@@ -12,6 +12,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,8 +44,17 @@ public class SwerveSimSubsystem extends SubsystemBase {
 
   SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(kinematics, gyro.getRotation2d(), getPositions(), new Pose2d(0, 0, new Rotation2d(0)));
   
+  StructArrayPublisher<SwerveModuleState> publisherStates = NetworkTableInstance.getDefault()
+    .getStructArrayTopic("MyStates", SwerveModuleState.struct).publish();
+
+  
+StructPublisher<Pose2d> publisherPose = NetworkTableInstance.getDefault()
+  .getStructTopic("MyPose", Pose2d.struct).publish();
+
+
   public SwerveSimSubsystem() {
     SmartDashboard.putData("Field", field);
+    
   }
 
   
@@ -109,5 +121,8 @@ public class SwerveSimSubsystem extends SubsystemBase {
     poseEstimator.update(Rotation2d.fromDegrees(gyro.getAngle()), getPositions());
     
     field.setRobotPose(poseEstimator.getEstimatedPosition());
+
+    publisherStates.set(getStates());
+    publisherPose.set(poseEstimator.getEstimatedPosition());
   }
 }

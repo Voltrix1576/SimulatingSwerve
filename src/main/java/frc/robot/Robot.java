@@ -61,10 +61,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void simulationInit() {
-    CommandScheduler.getInstance().setDefaultCommand(SwerveSimSubsystem.getInstance(), new SwerveDriveCommand());
+    //CommandScheduler.getInstance().setDefaultCommand(SwerveSimSubsystem.getInstance(), new SwerveDriveCommand());
   }
 
   @Override
   public void simulationPeriodic() {
+    SwerveSimSubsystem.getInstance().drive(0, 0, 0, true);
   }
 }
