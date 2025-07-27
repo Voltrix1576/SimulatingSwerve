@@ -6,6 +6,7 @@ package frc.robot.SwerveSim;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -48,8 +49,11 @@ public class SwerveSimSubsystem extends SubsystemBase {
     .getStructArrayTopic("MyStates", SwerveModuleState.struct).publish();
 
   
-StructPublisher<Pose2d> publisherPose = NetworkTableInstance.getDefault()
-  .getStructTopic("MyPose", Pose2d.struct).publish();
+  StructPublisher<Pose2d> publisherPose2d = NetworkTableInstance.getDefault()
+    .getStructTopic("MyPose2d", Pose2d.struct).publish();
+
+  StructPublisher<Pose3d> publisherPose3d = NetworkTableInstance.getDefault()
+    .getStructTopic("MyPose3d", Pose3d.struct).publish();
 
 
   public SwerveSimSubsystem() {
@@ -123,6 +127,9 @@ StructPublisher<Pose2d> publisherPose = NetworkTableInstance.getDefault()
     field.setRobotPose(poseEstimator.getEstimatedPosition());
 
     publisherStates.set(getStates());
-    publisherPose.set(poseEstimator.getEstimatedPosition());
+    publisherPose2d.set(poseEstimator.getEstimatedPosition());
+    
+    publisherPose3d.set(new Pose3d(poseEstimator.getEstimatedPosition()));
+
   }
 }

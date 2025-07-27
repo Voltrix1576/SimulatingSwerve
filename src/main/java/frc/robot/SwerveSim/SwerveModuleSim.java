@@ -12,10 +12,10 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 
 public class SwerveModuleSim {
-    LinearSystem<N1,N1,N1> drivePlant = LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60(1), 0.01, 6.75);
+    LinearSystem<N1,N1,N1> drivePlant = LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60(1), 0.1, 6.75);
     FlywheelSim driveSim = new FlywheelSim(drivePlant, DCMotor.getKrakenX60(1), 0);
 
-    LinearSystem<N1,N1,N1> turnPlant = LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), 0.01, 12.8);
+    LinearSystem<N1,N1,N1> turnPlant = LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), 0.05, 12.8);
     FlywheelSim turnSim = new FlywheelSim(turnPlant, DCMotor.getNEO(1), 0);
 
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.15, 2.4);
