@@ -3,7 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.SwerveSim;
-
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -24,10 +24,16 @@ public class SwerveSimSubsystem extends SubsystemBase {
 
   private static SwerveSimSubsystem instance;
 
+  public PIDController xController = new PIDController(0.5, 0, 0);
+  public PIDController yController = new PIDController(0.5, 0, 0);
+  public PIDController thetaController = new PIDController(0.5, 0, 0);
+
   private Field2d field = new Field2d();
 
   public double maxV = 4.57;
   public double maxAV = 9.23;
+
+  private double offsetAngle = 90;
 
   SwerveModuleSim frontLeft = new SwerveModuleSim();
   SwerveModuleSim frontRight = new SwerveModuleSim();
@@ -37,8 +43,8 @@ public class SwerveSimSubsystem extends SubsystemBase {
   GyroSim gyro = new GyroSim();
 
   private final Translation2d frontLeftLocation = new Translation2d(0.7 / 2, 0.7 / 2);
-  private final Translation2d frontRightLocation = new Translation2d(0.7 / 2, -(0.7 / 2));
-  private final Translation2d rearLeftLocation = new Translation2d(-(0.7 / 2), 0.7 / 2);
+  private final Translation2d frontRightLocation = new Translation2d((0.7 / 2), -(0.7 / 2));
+  private final Translation2d rearLeftLocation = new Translation2d(-(0.7 / 2), (0.7 / 2));
   private final Translation2d rearRightLocation = new Translation2d(-(0.7 / 2), -(0.7 / 2));
 
   SwerveDriveKinematics kinematics = new SwerveDriveKinematics(frontLeftLocation, frontRightLocation, rearLeftLocation, rearRightLocation);
@@ -58,6 +64,9 @@ public class SwerveSimSubsystem extends SubsystemBase {
 
   public SwerveSimSubsystem() {
     SmartDashboard.putData("Field", field);
+    xController.setSetpoint(3.8);
+    yController.setSetpoint(3.1);
+    thetaController.setSetpoint(0);
     
   }
 
@@ -87,6 +96,9 @@ public class SwerveSimSubsystem extends SubsystemBase {
     return kinematics.toChassisSpeeds(getStates());
   }
 
+  public Pose2d getPose() {
+    return poseEstimator.getEstimatedPosition();
+  }
 
   public void setSwerveState(SwerveModuleState[] states) {
     SwerveDriveKinematics.desaturateWheelSpeeds(states, 4.57);
@@ -98,13 +110,11 @@ public class SwerveSimSubsystem extends SubsystemBase {
 
   public void drive(double xv, double yv, double omega, boolean isFieldRelative) {
     SwerveModuleState[] states = kinematics.toSwerveModuleStates(
-      isFieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(xv, yv, omega, new Rotation2d(Math.toRadians(gyro.getAngle()))) 
+      isFieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(xv, yv, omega, new Rotation2d(Math.toRadians(gyro.getAngle() - offsetAngle))) 
       : new ChassisSpeeds(xv,yv,omega));
     
     setSwerveState(states);
   }
-
-
 
   public static SwerveSimSubsystem getInstance() {
     if (instance == null) {
@@ -112,7 +122,7 @@ public class SwerveSimSubsystem extends SubsystemBase {
     }
     return instance;
   }
-
+  
   @Override
   public void periodic() {
     frontLeft.periodic();

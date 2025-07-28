@@ -4,6 +4,7 @@
 
 package frc.robot.Commands;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.SwerveSim.SwerveSimSubsystem;
@@ -37,7 +38,17 @@ public class SwerveDriveCommand extends Command {
       omega = 0;
     }
 
-    swerveSim.drive(xv, yv, omega, true);
+    if (RobotContainer.driverController.a().getAsBoolean()) {
+      //swerveSim.periodic();
+      xv = swerveSim.xController.calculate(swerveSim.getPose().getY());
+      yv = swerveSim.yController.calculate(swerveSim.getPose().getX());
+      omega = swerveSim.thetaController.calculate(swerveSim.getPose().getRotation().getRadians());
+      System.out.println(swerveSim.getPose());
+      swerveSim.drive(xv, -yv, omega, true);
+      return;
+    }
+
+    swerveSim.drive(-xv, yv, -omega, true);
   }
 
   // Called once the command ends or is interrupted.

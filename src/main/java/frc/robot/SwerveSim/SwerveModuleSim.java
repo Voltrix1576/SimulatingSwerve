@@ -21,7 +21,7 @@ public class SwerveModuleSim {
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.15, 2.4);
 
     private PIDController drivePIDController = new PIDController(0.001, 0, 0);
-    private PIDController turnPIDController = new PIDController(0.2, 0, 0);
+    private PIDController turnPIDController = new PIDController(0.55, 0, 0);
 
     private double drivePos = 0;
     private double driveVel = 0;
@@ -57,9 +57,9 @@ public class SwerveModuleSim {
     }
 
     public void setDesiredState(SwerveModuleState state) {
-        state.optimize(getState().angle);
-        driveUsingPID(state.speedMetersPerSecond);
-        turnUsingPID(state.angle.getRadians());
+        SwerveModuleState optimizedState = optimize(state, turnPosRad);
+        driveUsingPID(optimizedState.speedMetersPerSecond);
+        turnUsingPID(optimizedState.angle.getRadians());
     }
 
     public void driveUsingPID(double setPoint) {
@@ -86,5 +86,24 @@ public class SwerveModuleSim {
         return driveSim.getAngularVelocityRadPerSec() * 0.0508;
     }
 
+    private static SwerveModuleState optimize(SwerveModuleState desiredState, double currentAngle) {
+        double angleDiff = (desiredState.angle.getRadians() - currentAngle) % Rotation2d.fromDegrees(360).getRadians();
+        double targetAngle = currentAngle + angleDiff;
+        double targetSpeed = desiredState.speedMetersPerSecond;
+
+        if (angleDiff <= Rotation2d.fromDegrees(-270).getRadians()) {
+            targetAngle += Rotation2d.fromDegrees(360).getRadians();;
+        } else if (Rotation2d.fromDegrees(-90).getRadians() > angleDiff && angleDiff > Rotation2d.fromDegrees(-270).getRadians()) {
+            targetAngle += Rotation2d.fromDegrees(180).getRadians();
+            targetSpeed = -targetSpeed;
+        } else if (Rotation2d.fromDegrees(90).getRadians() < angleDiff && angleDiff < Rotation2d.fromDegrees(270).getRadians()) {
+            targetAngle -= Rotation2d.fromDegrees(180).getRadians();
+            targetSpeed = -targetSpeed;
+        } else if (angleDiff >= Rotation2d.fromDegrees(270).getRadians()) {
+            targetAngle -= Rotation2d.fromDegrees(360).getRadians();
+        }
+        return new SwerveModuleState(targetSpeed, Rotation2d.fromRadians(targetAngle));
+
+    }
 
 }

@@ -5,24 +5,25 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.SwerveSim.SwerveSimSubsystem;
 
 public class RobotContainer {
+  public static SwerveSimSubsystem swerveSimSubsystem;
   public static CommandXboxController driverController = new CommandXboxController(0);
 
   public RobotContainer() {
+    swerveSimSubsystem = SwerveSimSubsystem.getInstance();
     configureBindings();
   }
 
   private void configureBindings() {
-    driverController.rightTrigger().whileTrue(new InstantCommand(() -> SwerveSimSubsystem.getInstance().setVelocityFactor(0.5)))
+    driverController.rightTrigger().whileTrue(new InstantCommand(() -> swerveSimSubsystem.setVelocityFactor(0.5)))
     .whileFalse(new InstantCommand(() -> SwerveSimSubsystem.getInstance().setVelocityFactor(1)));
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return null;
   }
 }

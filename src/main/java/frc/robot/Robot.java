@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Commands.SwerveDriveCommand;
-import frc.robot.SwerveSim.SwerveSimSubsystem;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -15,6 +14,7 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     m_robotContainer = new RobotContainer();
+    CommandScheduler.getInstance().setDefaultCommand(RobotContainer.swerveSimSubsystem, new SwerveDriveCommand()); 
   }
 
   @Override
@@ -60,12 +60,8 @@ public class Robot extends TimedRobot {
   public void teleopExit() {}
 
   @Override
-  public void simulationInit() {
-    //CommandScheduler.getInstance().setDefaultCommand(SwerveSimSubsystem.getInstance(), new SwerveDriveCommand());
-  }
+  public void simulationInit() {}
 
   @Override
-  public void simulationPeriodic() {
-    SwerveSimSubsystem.getInstance().drive(0, 0, 0, true);
-  }
+  public void simulationPeriodic() {}
 }
