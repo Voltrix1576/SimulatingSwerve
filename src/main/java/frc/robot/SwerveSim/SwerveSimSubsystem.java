@@ -64,10 +64,6 @@ public class SwerveSimSubsystem extends SubsystemBase {
 
   public SwerveSimSubsystem() {
     SmartDashboard.putData("Field", field);
-    xController.setSetpoint(3.8);
-    yController.setSetpoint(3.1);
-    thetaController.setSetpoint(0);
-    
   }
 
   

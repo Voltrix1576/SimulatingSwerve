@@ -5,6 +5,8 @@
 package frc.robot.Commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.SwerveSim.SwerveSimSubsystem;
@@ -39,12 +41,12 @@ public class SwerveDriveCommand extends Command {
     }
 
     if (RobotContainer.driverController.a().getAsBoolean()) {
-      //swerveSim.periodic();
-      xv = swerveSim.xController.calculate(swerveSim.getPose().getY());
-      yv = swerveSim.yController.calculate(swerveSim.getPose().getX());
-      omega = swerveSim.thetaController.calculate(swerveSim.getPose().getRotation().getRadians());
-      System.out.println(swerveSim.getPose());
+      xv = swerveSim.xController.calculate(swerveSim.getPose().getY(), SmartDashboard.getNumber("Reef X SetPoint", 0));
+      yv = swerveSim.yController.calculate(swerveSim.getPose().getX(), SmartDashboard.getNumber("Reef Y SetPoint", 0));
+      omega = swerveSim.thetaController.calculate(swerveSim.getPose().getRotation().getRadians(), 
+              Rotation2d.fromDegrees(SmartDashboard.getNumber("Reef Angle SetPoint", 0)).getRadians());
       swerveSim.drive(xv, -yv, omega, true);
+      
       return;
     }
 
