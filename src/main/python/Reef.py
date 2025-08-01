@@ -1,25 +1,19 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-import math
-import os
 from networktables import NetworkTables
 import time
 
-WINDOW_SIZE = 500
-CENTER = WINDOW_SIZE // 2
-NUM_SIDES = 6
-BUTTON_RADIUS = 180
-BUTTON_SPACING = 50
+WINDOW_SIZE = 800
+BUTTON_WIDTH = 40
+BUTTON_HEIGHT = 30
 
 NetworkTables.initialize('127.0.0.1')
-if not NetworkTables.isConnected():
-    while not NetworkTables.isConnected():
-        time.sleep(0.1)
-    print('Connected')
-
+while not NetworkTables.isConnected():
+    time.sleep(0.1)
+print("Connected to NetworkTables")
 table = NetworkTables.getTable("SmartDashboard")
 
-Reef = {
+reef = {
     1 : [4.18, 3.1, 0],
     2 : [3.85, 3.1, 0],
     3 : [2.9, 3.65, 60],
@@ -31,60 +25,49 @@ Reef = {
     9 : [5.168, 5.329, -120],
     10 : [5.37, 5, -120],
     11 : [5.341, 3.946, -60],
-    12 : [5.144, 3.687, -60]
+    12 : [5.144, 3.687, -60],
+    13 : [7, 1.2, -53.70],
+    14 : [1.05, 1.1, 55.68],
+    15 : [0.5, 6.08, 90],
+    16 : [6.5, 7.8, 0]
+}
+
+# מיקום הכפתורים לפי פיקסלים יחסיים לתמונה
+button_positions = {
+    1: (350, 450), 2: (390, 450),
+    3: (450, 430), 4: (470, 400),
+    5: (470, 340), 6: (430, 310),
+    7: (390, 290), 8: (350, 290),
+    9: (290, 320), 10: (270, 350),
+    11: (270, 390), 12: (280, 420),
+    13: (100, 600), 14: (630, 600),
+    15: (680, 290), 16: (180, 150)
 }
 
 class ReefGUI:
     def __init__(self, root: tk.Tk):
-        global curr_color
         self.root = root
         self.root.title("Reef GUI")
         self.root.geometry(f"{WINDOW_SIZE}x{WINDOW_SIZE}")
 
-        self.canvas = tk.Canvas(root, width=WINDOW_SIZE, height=WINDOW_SIZE, bg="gray")
+        self.canvas = tk.Canvas(root, width=WINDOW_SIZE, height=WINDOW_SIZE)
         self.canvas.pack()
 
-        self.reef_blue = ImageTk.PhotoImage(Image.open("reef_blue.png").resize((150, 150)))
+        image = Image.open("Field.png").resize((WINDOW_SIZE, WINDOW_SIZE))
+        self.bg_image = ImageTk.PhotoImage(image)
+        self.canvas.create_image(0, 0, anchor="nw", image=self.bg_image)
 
-        self.reef_img_obj = self.canvas.create_image(CENTER, CENTER, image=self.reef_blue)
+        self.buttons = {}
+        for key, (x, y) in button_positions.items():
+            self.create_button(key, x, y)
 
-        self.status_label = tk.Label(root, text="", font=("Arial", 12))
-        self.status_label.pack(pady=5)
+    def create_button(self, key, x, y):
+        btn = tk.Button(self.root, text=str(key), command=lambda k=key: self.on_click(k))
+        self.canvas.create_window(x, y, window=btn, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
+        self.buttons[key] = btn
 
-        self.create_paired_buttons()
-
-    def create_paired_buttons(self):
-        angle_step = 360 / NUM_SIDES
-        start_angle_deg = 90
-        button_number = 1
-
-        for i in range(NUM_SIDES):
-            angle_deg = start_angle_deg - i * angle_step
-            angle_rad = math.radians(angle_deg)
-
-            base_x = CENTER + BUTTON_RADIUS * math.cos(angle_rad)
-            base_y = CENTER + BUTTON_RADIUS * math.sin(angle_rad)
-
-            perp_angle_rad = angle_rad + math.pi / 2
-
-            x1 = base_x + (BUTTON_SPACING / 2) * math.cos(perp_angle_rad)
-            y1 = base_y + (BUTTON_SPACING / 2) * math.sin(perp_angle_rad)
-
-            x2 = base_x - (BUTTON_SPACING / 2) * math.cos(perp_angle_rad)
-            y2 = base_y - (BUTTON_SPACING / 2) * math.sin(perp_angle_rad)
-
-            btn1 = tk.Button(self.root, text=f"{button_number}",
-                             command=lambda n=button_number: self.on_button_click(n))
-            btn1.place(x=x1 - 25, y=y1 - 15, width=50, height=30)
-            button_number += 1
-
-            btn2 = tk.Button(self.root, text=f"{button_number}",
-                             command=lambda n=button_number: self.on_button_click(n))
-            btn2.place(x=x2 - 25, y=y2 - 15, width=50, height=30)
-            button_number += 1
-
-    def on_button_click(self, button_number: int):
-        x, y, angle = Reef[button_number]
+    def on_click(self, key):
+        x, y, angle = reef[key]
         table.putNumber("Reef X SetPoint", x)
         table.putNumber("Reef Y SetPoint", y)
         table.putNumber("Reef Angle SetPoint", angle)
