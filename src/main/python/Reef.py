@@ -8,6 +8,7 @@ BUTTON_WIDTH = 40
 BUTTON_HEIGHT = 30
 
 NetworkTables.initialize('127.0.0.1')
+print("Connecting to NetworkTables")
 while not NetworkTables.isConnected():
     time.sleep(0.1)
 print("Connected to NetworkTables")
@@ -61,6 +62,8 @@ class ReefGUI:
         for key, (x, y) in button_positions.items():
             self.create_button(key, x, y)
 
+        self.root.bind("<Key>", self.on_key_press)
+
     def create_button(self, key, x, y):
         btn = tk.Button(self.root, text=str(key), command=lambda k=key: self.on_click(k))
         self.canvas.create_window(x, y, window=btn, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
@@ -71,6 +74,16 @@ class ReefGUI:
         table.putNumber("Reef X SetPoint", x)
         table.putNumber("Reef Y SetPoint", y)
         table.putNumber("Reef Angle SetPoint", angle)
+
+    def on_key_press(self, event):
+        key = event.keysym
+        if key == '1':
+            table.putNumber("Height", 40)
+        elif key == '2':
+            table.putNumber("Height", 70)
+        elif key == '3':
+            table.putNumber("Height", 100)
+            
 
 def main():
     root = tk.Tk()
